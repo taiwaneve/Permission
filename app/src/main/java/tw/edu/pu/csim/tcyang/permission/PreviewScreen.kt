@@ -1,6 +1,7 @@
 package tw.edu.pu.csim.tcyang.permission
 
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -24,6 +26,7 @@ class PreviewScreen {
 @Composable
 fun PreviewScreen(modifier: Modifier = Modifier) {
     val previewViewModel: PreviewViewModel = viewModel()
+    val analysisResult = previewViewModel.analysisResult
 
     val context = LocalContext.current
 
@@ -38,12 +41,15 @@ fun PreviewScreen(modifier: Modifier = Modifier) {
     // 使用 DisposableEffect 來管理綁定與解綁
     DisposableEffect(lifecycleOwner, cameraController) {
 
-        // 在 Composable 進入時，將相機控制器綁定到生命週期
+        // 在 Composable 進入時，將相機控制器綁定到生命週期，並啟動影像分析
         cameraController?.bindToLifecycle(lifecycleOwner)
-
+        previewViewModel.startImageAnalysis()
         onDispose {
             // 當 Composable 離開時，解綁並釋放資源
             previewViewModel.releaseCameraController()
+            // 停止影像分析-------------
+            previewViewModel.stopImageAnalysis()
+
         }
     }
     // 顯示相機預覽
@@ -60,6 +66,14 @@ fun PreviewScreen(modifier: Modifier = Modifier) {
             }
         }
     )
+        // 顯示影像分析結果
+        Text(
+            text = analysisResult,
+            modifier = Modifier
+                .background(Color.Yellow.copy(alpha = 0.5f)), // 設定半透明背景
+            color = Color.Blue,
+        )
+
 
 
         Row(

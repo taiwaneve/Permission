@@ -2,6 +2,7 @@ package tw.edu.pu.csim.tcyang.permission
 
 import android.content.Context
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.view.LifecycleCameraController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class PreviewViewModel : ViewModel() {
     // 保存相機控制器
@@ -29,6 +31,7 @@ class PreviewViewModel : ViewModel() {
         cameraController?.unbind()
         cameraController = null
     }
+
 
     // 保存當前鏡頭選擇的狀態
     var cameraSelector by mutableStateOf(CameraSelector.DEFAULT_BACK_CAMERA)
@@ -82,5 +85,25 @@ class PreviewViewModel : ViewModel() {
         analysisExecutor?.shutdown()
         analysisExecutor = null
     }
+    fun startImageAnalysis() {
+        // 如果執行緒未初始化，則創建一個
+        if (analysisExecutor == null) {
+            analysisExecutor = Executors.newSingleThreadExecutor()
+        }
+        cameraController?.setImageAnalysisAnalyzer(
+            analysisExecutor!!,
+            ImageAnalysis.Analyzer { imageProxy ->
+                // 在這裡處理每一幀圖像的邏輯
+                val width = imageProxy.width
+                val height = imageProxy.height
+                val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                // 更新 ViewModel 的狀態
+                analysisResult = "圖像 ($width x $height), 旋轉: $rotationDegrees"
+                // 完成處理後，必須關閉 ImageProxy
+                imageProxy.close()
+            }
+        )
+    }
 
 }
+
