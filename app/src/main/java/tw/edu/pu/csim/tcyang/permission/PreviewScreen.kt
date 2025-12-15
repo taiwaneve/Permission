@@ -26,9 +26,13 @@ class PreviewScreen {
 @Composable
 fun PreviewScreen(modifier: Modifier = Modifier) {
     val previewViewModel: PreviewViewModel = viewModel()
-    val analysisResult = previewViewModel.analysisResult
+    //val analysisResult = previewViewModel.analysisResult
 
     val context = LocalContext.current
+
+    // 取得 手勢的分析結果----------------------------
+    val gestureResult = previewViewModel.gestureResult
+
 
     //取得目前的生命週期資源
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -68,7 +72,8 @@ fun PreviewScreen(modifier: Modifier = Modifier) {
     )
         // 顯示影像分析結果
         Text(
-            text = analysisResult,
+            //text = analysisResult,
+            text = gestureResult,
             modifier = Modifier
                 .background(Color.Yellow.copy(alpha = 0.5f)), // 設定半透明背景
             color = Color.Blue,
